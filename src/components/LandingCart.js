@@ -1,7 +1,45 @@
+import { useState } from "react";
 import BottomHeader from "./BottomHeader";
 import Header from "./Header";
+import products from "./products.json";
+import Modal from "./Modal";
 
 const LandingCart = () => {
+  const [data, setData] = useState(products.data);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedItemIndex, setSelectedItemIndex] = useState(null);
+
+  const handleRight = (index) => {
+    let newArr = [...data];
+    newArr[index].status = "approved";
+
+    setData(newArr);
+  };
+
+  const handleYesWrong = () => {
+    closeModal();
+    let newArr = [...data];
+    newArr[selectedItemIndex].status = "urgent";
+    setSelectedItemIndex("");
+    setData(newArr);
+  };
+  const handleNoWrong = () => {
+    closeModal();
+    let newArr = [...data];
+    newArr[selectedItemIndex].status = "missing";
+    setSelectedItemIndex("");
+    setData(newArr);
+  };
+
+  const openModal = (index) => {
+    setSelectedItemIndex(index);
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
   return (
     <div>
       <Header />
@@ -59,45 +97,105 @@ const LandingCart = () => {
           </div>
 
           <div>
-            <table class="min-w-full">
-              <thead>
+            <table className="min-w-full mt-10">
+              <thead className="border rounded-sm">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Name
+                  <th></th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Product Name
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Age
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Brand
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Country
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Price
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Email
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Quantity
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Total
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Status
+                  </th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td class="px-6 py-4 whitespace-nowrap">John Doe</td>
-                  <td class="px-6 py-4 whitespace-nowrap">30</td>
-                  <td class="px-6 py-4 whitespace-nowrap">USA</td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    johndoe@example.com
-                  </td>
-                </tr>
-                <tr>
-                  <td class="px-6 py-4 whitespace-nowrap">Jane Smith</td>
-                  <td class="px-6 py-4 whitespace-nowrap">28</td>
-                  <td class="px-6 py-4 whitespace-nowrap">Canada</td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    janesmith@example.com
-                  </td>
-                </tr>
+                {data.map((item, index) => (
+                  <tr key={item.id} className="border-y-2">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <img
+                        src={require("./../assets/AvocadoHass.jpg")}
+                        alt="product"
+                        width="100"
+                        height="50"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{item.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {item.brand}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {item.price}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{item.qty}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {item.total}
+                    </td>
+                    <td>
+                      {item.status === "approved" ? (
+                        <span className="bg-green-700 text-white py-1 px-4 rounded-full">
+                          Approved
+                        </span>
+                      ) : item.status === "missing" ? (
+                        <span className="bg-red-700 text-white py-1 px-4 rounded-full">
+                          Missing
+                        </span>
+                      ) : item.status === "urgent" ? (
+                        <span className="bg-red-400 text-white py-1 px-4 rounded-full">
+                          Missing - Urgent
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="flex flex-row align-middle mt-10">
+                      <button onClick={() => handleRight(index)}>✅</button>
+                      <button onClick={() => openModal(index)} className="pl-4">
+                        ❌
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      {isOpen ? (
+        <Modal
+          isOpen={isOpen}
+          closeModal={closeModal}
+        >
+          <h2>Missing Product</h2>
+          <p>is this product URGENT ?</p>
+          <div className="flex flex-row-reverse mt-8">
+            <span
+              className="bg-black text-white py-1 px-3 rounded-full ml-4 cursor-pointer"
+              onClick={handleNoWrong}
+            >
+              NO
+            </span>
+            <span
+              onClick={handleYesWrong}
+              className="bg-black text-white py-1 px-3 rounded-full ml-4 cursor-pointer"
+            >
+              YES
+            </span>
+          </div>
+        </Modal>
+      ) : null}
     </div>
   );
 };
